@@ -1,0 +1,630 @@
+\documentclass[11pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern,amsmath,amssymb,amsthm,mathtools,booktabs,microtype}
+\usepackage[margin=1in]{geometry}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\definecolor{linkblue}{RGB}{28,66,116}
+\usepackage[colorlinks=true,allcolors=linkblue,breaklinks=true]{hyperref}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Subexponential Set Splitting}
+\fancyhead[R]{\small Research draft}
+\fancyfoot[C]{\thepage}
+\setlength{\headheight}{14pt}
+\setlength{\emergencystretch}{2em}
+\setlist{itemsep=3pt,topsep=5pt}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+\newcommand{\poly}{\operatorname{poly}}
+\newcommand{\sat}{\ensuremath{\#3\textnormal{SAT}}}
+\newcommand{\ssplit}{\textsc{Set Splitting}}
+\newcommand{\mono}{\operatorname{mono}}
+\newcommand{\splitnum}{\operatorname{split}}
+\newcommand{\Count}{\mathsf{Count}}
+\newcommand{\bits}{\{0,1\}}
+\newcommand{\ind}{\mathbf{1}}
+\title{Subexponential Set Splitting through\Selector Moments and Exact \sat}
+\author{}
+\date{29 October 2026}
+\begin{document}
+\maketitle
+\vspace{-1.5em}
+\begin{center}
+\small\textit{AI-assisted research draft. No authorship or publication-priority claim is assigned.}
+\end{center}
+\begin{abstract}
+We give a variable-efficient reduction from the complete split-count
+distribution of an unbounded-rank hypergraph to exact counting for
+3-CNF formulas. For a hypergraph with $n$ vertices and $m$ indexed edges,
+the reduction makes $m+1$ counting calls, each with $O(n+m)$ variables
+and $O(\sum_e |e|+m+1)$ clauses. Selectors mark arbitrary subsets of
+monochromatic edges; fixing the number of selectors computes binomial
+moments, from which the whole distribution is recovered exactly.
+Combining this reduction with the general-density exact-counting theorem
+stated in the October 2026 SAT manuscript gives deterministic
+polynomial-space time
+\[
+  2^{O(k\log\log k/\sqrt{\log k})}+|I|^{O(1)}
+\]
+for \ssplit\ parameterized by the target number $k$ of split sets.
+Using only the weaker rate documented in the accompanying formalization
+scope note gives $2^{O(k(\log\log k)^2/\sqrt{\log k})}+|I|^{O(1)}$.
+The same bounds, with $k$ replaced by $n+m$, compute the original
+hypergraph's full distribution and an optimal coloring. The reduction
+also applies to counting the number of satisfied predicates in a family
+of 2-CNF formulas, and hence to the complete satisfaction profile of
+arbitrary-width CNF. All subexponential bounds explicitly depend on the
+imported counting theorem; the reductions and counting identities do not.
+\end{abstract}
+
+\section{Introduction}
+
+An edge of a hypergraph is \emph{split} by a Boolean coloring if it contains
+both colors. In the parameterized \ssplit\ problem, the input is a
+hypergraph and a target $k$, and the question is whether some coloring
+splits at least $k$ edges. The parameter counts edges that must be split;
+it does not bound their cardinality. We allow arbitrary edge sizes.
+
+Lokshtanov and Saurabh~\cite{LS09} give a polynomial-time decision kernel
+with at most $k$ vertices and $2k$ edges. Specialized algorithms of
+Nederlof, van Rooij, and van Dijk~\cite{NRD14} achieve $O^*(1.7171^k)$
+time with exponential space and $O^*(1.8213^k)$ time with polynomial
+space. Here $O^*$ suppresses polynomial factors. These are useful
+established reference points for the present transfer result.
+
+The recent manuscript \emph{The Exponential Time Hypothesis is False}
+states subexponential exact-counting algorithms for each fixed CNF
+width~\cite{SAT26}. A direct encoding of whether every hyperedge splits
+uses clauses whose width equals the edge size. Replacing large OR gates
+by bounded-fan-in circuits can introduce one auxiliary variable per
+incidence. Even after the decision kernel, this can produce
+$\Theta(k^2)$ variables, which does not by itself give a subexponential
+dependence on $k$ from the imported quantitative bound.
+
+We avoid this expansion by counting selected subsets of \emph{unsplit}
+edges. A selector need only imply monochromaticity. Monochromaticity is
+a conjunction of pairwise equalities, so each guarded condition is a
+clause of width at most three without an incidence variable. A cardinality
+circuit on the selectors uses only $O(m)$ additional variables. Its
+counts are binomial moments of the unsplit-edge distribution, which can
+be inverted in polynomial time.
+
+\paragraph{Contributions.}
+The main unconditional reduction, Theorem~\ref{thm:encoding}, uses
+$O(n+m)$ variables regardless of edge rank. Theorem~\ref{thm:profile}
+transfers the two documented general-density counting rates to full
+split profiles. Corollary~\ref{cor:parameter} combines the transfer with
+the decision kernel. Section~\ref{sec:extensions} proves extensions to
+pinned colors, optimal colorings, and families of 2-CNF predicates.
+
+\paragraph{External dependence and status.}
+We treat the quantitative counting statements in Section~\ref{sec:premises}
+as explicit algorithmic premises. This paper neither reproduces their
+proofs nor independently certifies their formalization. The stronger
+manuscript rate and the weaker rate documented in its formalization
+scope note are kept separate. This is a research draft, not a claim of
+external review or publication priority. The proposed contribution is
+the quantitative, variable-efficient application of established counting
+ideas to unbounded-rank split profiles.
+
+\section{Preliminaries and counting premises}
+\label{sec:premises}
+
+A hypergraph is $H=(V,(e_i)_{i=1}^m)$, with $V=[n]$ and $e_i\subseteq V$.
+Edges are indexed: parallel edges remain distinct occurrences. Put
+\[
+ s=n+m,\qquad J=\sum_{i=1}^m |e_i|.
+\]
+The universe and incidence lists are explicit. Let $L$ denote their bit
+encoding length, including isolated vertices and edge labels; polynomial
+factors may depend on $L+1$. Empty and singleton edges are never split.
+For convenience, we call them monochromatic, including the vacuous
+empty-edge case.
+
+For $x\in\bits^n$, let $u_H(x)$ be the number of monochromatic edges and
+$b_H(x)=m-u_H(x)$ the number of split edges. Define
+\begin{align}
+ a_j(H)&=|\{x\in\bits^n:u_H(x)=j\}|,\label{eq:aj}\\
+ Q_H(z)&=\sum_{j=0}^m a_j(H)z^j, &
+ P_H(z)&=\sum_{x\in\bits^n}z^{b_H(x)}
+          =\sum_{j=0}^m a_j(H)z^{m-j}.\label{eq:polys}
+\end{align}
+Thus $P_H$ is the \emph{split-count polynomial}. For nonempty edges,
+$Q_H$ is a specialization of the hypergraph coboundary polynomial studied
+by White~\cite{White11}. Neither this polynomial nor its usual
+deletion--contraction identity is claimed to be new.
+
+All logarithmic expressions below are for sufficiently large arguments;
+finitely many small cases are solved directly. For $\alpha\in\{1,2\}$,
+write
+\[
+ f_\alpha(v)=\frac{v(\log\log v)^\alpha}{\sqrt{\log v}}.
+\]
+The choice of logarithm base changes only constants. A monotone extension
+handles small arguments.
+
+\begin{definition}[Counting interfaces]\label{def:count}
+Interface $\Count_\alpha$ is a uniform deterministic algorithm that
+exactly counts satisfying assignments of a 3-CNF with $v$ declared
+variables and encoding length $\ell$ in time
+\[
+ (\ell+1)^{O(1)}2^{O(f_\alpha(v))}
+\]
+and space polynomial in $\ell+v+1$.
+Interface $\Count_{\mathrm{sp}}$ has, for every fixed $D$, time
+$\poly(\ell+v)2^{O_D(v/\sqrt{\log v})}$ on formulas with at most $Dv$
+clauses, and polynomial space.
+\end{definition}
+
+The revised October 25 manuscript states $\Count_1$ and
+$\Count_{\mathrm{sp}}$ as specializations of its fixed-width main
+theorem~\cite{SAT26}. The accompanying scope note documents
+$\Count_2$~\cite{Scope26}. We use width three throughout; no hidden
+constant is allowed to depend on a growing edge size. The interfaces
+count assignments to \emph{declared} variables, including isolated ones.
+If an implementation drops such variables, their factor of two must be
+restored. Unit and binary clauses can be padded by repeating literals
+when an interface requires exactly three literal occurrences.
+
+\section{Selector moments and a linear-variable encoding}
+\label{sec:encoding}
+
+Define the binomial moments
+\begin{equation}
+ F_t(H)=\sum_{x\in\bits^n}\binom{u_H(x)}{t},\qquad 0\le t\le m,
+ \label{eq:moments}
+\end{equation}
+where $\binom{j}{t}=0$ for $t>j$. The selectors below count subsets of
+monochromatic edges rather than requiring every monochromatic edge to
+be selected.
+
+\begin{lemma}[Binomial inversion]\label{lem:inversion}
+The moments determine the whole profile by
+\begin{equation}
+ a_j(H)=\sum_{t=j}^m(-1)^{t-j}\binom{t}{j}F_t(H).
+ \label{eq:inverse}
+\end{equation}
+Equivalently,
+\begin{equation}
+ P_H(z)=\sum_{t=0}^m F_t(H)z^{m-t}(1-z)^t.
+ \label{eq:splitinverse}
+\end{equation}
+The transformation uses polynomially many bit operations in $n+m+1$.
+\end{lemma}
+\begin{proof}
+Let $B_H(w)=\sum_{t=0}^m F_t(H)w^t$. The binomial theorem gives
+\[
+ B_H(w)=\sum_x(1+w)^{u_H(x)}=Q_H(1+w).
+\]
+Hence $Q_H(z)=B_H(z-1)$; taking coefficients proves
+\eqref{eq:inverse}. Substituting $z^{-1}$ and multiplying by $z^m$
+gives the polynomial identity~\eqref{eq:splitinverse}.
+Each $F_t\le 2^{n+m}$. Every term of~\eqref{eq:inverse} has magnitude
+at most $2^{n+2m}$, and each partial sum has magnitude at most
+$(m+1)2^{n+2m}$. Thus $O(n+m+\log(m+1))$ bits suffice, including
+intermediate signed arithmetic. An $O(m^2)$-term implementation is
+polynomial in the explicit output size.
+\end{proof}
+
+\begin{lemma}[Linear-size exact cardinality circuit]\label{lem:adder}
+For $m$ Boolean inputs and $0\le t\le m$, the predicate that exactly $t$
+inputs equal one has a fan-in-two Boolean circuit with $O(m+1)$ gates.
+It admits an equivalent width-three Tseitin encoding with $O(m+1)$
+auxiliary variables and clauses, and a unique auxiliary extension for
+every satisfying input assignment.
+\end{lemma}
+\begin{proof}
+Pad the input list with zeros to a power of two less than $2m$ when
+$m>0$. Sum the bits in a balanced binary tree. At level $h$, there are
+$O(m/2^h)$ additions on $O(h)$-bit operands, each requiring $O(h)$
+bounded-fan-in gates. The total is
+\[
+ O\!\left(m\sum_{h\ge1}\frac{h}{2^h}\right)=O(m).
+\]
+Fixing the output bits to the binary expansion of $t$ uses $O(\log(m+1))$
+unit conditions. Constants and $m=0$ require only constant overhead.
+
+Introduce a variable for each gate and encode its full logical
+equivalence. For example, $g\leftrightarrow(a\wedge b)$ is encoded by
+\[
+ (\neg g\vee a)\ \wedge\ (\neg g\vee b)\ \wedge\
+ (g\vee\neg a\vee\neg b).
+\]
+OR, NOT, and a constant-size expansion of XOR have width-three encodings.
+Once the input bits are fixed, each gate variable is uniquely determined
+in topological order. Consequently satisfying inputs have exactly one
+extension, while nonsatisfying inputs have none.
+\end{proof}
+
+\begin{theorem}[Selector encoding]\label{thm:encoding}
+For every hypergraph $H$ and $0\le t\le m$, one can construct in
+polynomial time a 3-CNF $\Psi_{H,t}$ with
+\[
+ v=O(n+m+1),\qquad c=O(J+m+1)
+\]
+variables and clauses, respectively, such that
+$\#\Psi_{H,t}=F_t(H)$. The implicit constants are absolute and independent
+of edge rank. Its bit encoding length is
+$O((J+n+m+1)\log(n+m+2))$.
+\end{theorem}
+\begin{proof}
+Use the color variables $x_1,\ldots,x_n$ and introduce a selector $y_i$
+for each indexed edge $e_i$. For a nonempty $e_i$, choose an anchor
+$a_i\in e_i$. For every $v\in e_i\setminus\{a_i\}$ include the clauses
+\begin{equation}
+ (\neg y_i\vee\neg x_{a_i}\vee x_v),\qquad
+ (\neg y_i\vee x_{a_i}\vee\neg x_v).
+ \label{eq:guard}
+\end{equation}
+They express $y_i\Rightarrow(x_{a_i}=x_v)$. No extra variable is introduced
+for an incidence. Empty and singleton edges need no guarded clauses,
+because they are always unsplit. Finally add the exact-$t$ circuit and
+the unique-extension encoding of Lemma~\ref{lem:adder} on the $m$
+selectors.
+
+Fix a coloring $x$. A selector may equal one only on a monochromatic
+edge; on each such edge it may independently equal zero or one. The
+exact-$t$ condition therefore permits exactly $\binom{u_H(x)}t$ selector
+assignments. For every permitted selector assignment the gate variables
+have one extension. Summing over $x$ proves the count identity.
+
+The guarded clauses number
+$2\sum_i\max\{|e_i|-1,0\}\le2J$.
+The cardinality construction adds $O(m+1)$ variables and clauses.
+The declared color variables contribute $n$, even if they are isolated.
+All variable indices use $O(\log(n+m+2))$ bits, giving the asserted length.
+\end{proof}
+
+\begin{remark}[The one-way implication is essential]
+The guards are deliberately \emph{not} equivalences between $y_i$ and
+monochromaticity. Requiring equivalence would destroy the subset-counting
+interpretation. In contrast, the auxiliary \emph{gate} constraints must
+be equivalences to obtain a unique gate extension. These two roles are
+different.
+\end{remark}
+
+\subsection{A small example}
+Let $V=\{a,b,c\}$ and let the edges be $\{a,b\}$ and $\{b,c\}$. There
+are two colorings with no monochromatic edge, four with one, and two
+with two. Thus
+\[
+ (a_0,a_1,a_2)=(2,4,2),\qquad(F_0,F_1,F_2)=(8,8,2).
+\]
+Inversion returns $a_2=2$, $a_1=8-2\cdot2=4$, and
+$a_0=8-8+2=2$. The resulting split-count polynomial is
+$P_H(z)=2+4z+2z^2$. This example illustrates why counting only the
+existence of a selector assignment would lose the needed information.
+
+\section{Subexponential algorithms}
+\label{sec:algorithms}
+
+\begin{theorem}[Complete split profiles]\label{thm:profile}
+Assume $\Count_\alpha$ for $\alpha\in\{1,2\}$. On every explicitly
+represented hypergraph with $s=n+m$, all coefficients of $P_H$ can be
+computed deterministically in polynomial space and time
+\begin{equation}
+ (L+1)^{O(1)}2^{O(f_\alpha(s))}.
+ \label{eq:profiletime}
+\end{equation}
+There is no restriction on rank, parallel edges, or isolated vertices.
+\end{theorem}
+\begin{proof}
+For $t=0,1,\ldots,m$, construct $\Psi_{H,t}$ and call the one fixed
+width-three counting algorithm. Theorem~\ref{thm:encoding} gives at most
+$C(s+1)$ variables for an absolute $C$. The encoding lengths are polynomial
+in $L+1$. Since $f_\alpha(C(s+1))=O(f_\alpha(s))$ for large $s$, each
+call has the asserted exponential bound. The $m+1$ calls and the inversion
+of Lemma~\ref{lem:inversion} add only polynomial overhead.
+
+Make the calls sequentially, keeping only their integer outputs.
+The formulas have polynomial length, each call uses polynomial space,
+and all moment and transform values have polynomial bit length.
+The output has $m+1$ coefficients of at most $n+1$ bits each. Thus the
+whole algorithm uses polynomial space.
+\end{proof}
+
+\begin{corollary}[Parameterized decision]\label{cor:parameter}
+Under $\Count_\alpha$, an instance $I$ of \ssplit\ with target $k$ can
+be decided deterministically in polynomial space and time
+\begin{equation}
+ |I|^{O(1)}+2^{O(f_\alpha(k))}.
+ \label{eq:paramtime}
+\end{equation}
+In particular, $\Count_1$ gives
+$2^{O(k\log\log k/\sqrt{\log k})}+|I|^{O(1)}$, and $\Count_2$ gives
+$2^{O(k(\log\log k)^2/\sqrt{\log k})}+|I|^{O(1)}$.
+Both are $2^{o(k)}+|I|^{O(1)}$.
+\end{corollary}
+\begin{proof}
+Trivial targets can be answered immediately. Apply the decision kernel
+of Lokshtanov and Saurabh~\cite[Theorem~1]{LS09}. It either answers the
+instance or returns an equivalent instance $(H',k_0)$ with at most $k$
+vertices and $2k$ edges. Keep $k$ as the original parameter; no equality
+between $k$ and $k_0$ is needed. Compute $P_{H'}$ by
+Theorem~\ref{thm:profile} and answer yes exactly when a coefficient at an
+index at least $k_0$ is positive.
+
+The kernel has $s'\le3k$ and a representation of polynomial bit length
+in $k+1$. Its polynomial factors are absorbed in $2^{O(f_\alpha(k))}$
+for large $k$. The initial reduction costs polynomial time in $|I|$.
+Since $(\log\log k)^\alpha/\sqrt{\log k}\to0$, the dependence is
+subexponential in $k$.
+\end{proof}
+
+\begin{remark}[A decision kernel is sufficient]
+The computation in Corollary~\ref{cor:parameter} counts colorings of the
+\emph{reduced} instance. We do not assert that the kernel preserves the
+original coloring distribution. The full-profile theorem applies directly
+to the original input with parameter $n+m$, whereas the target-$k$
+corollary is a decision result.
+\end{remark}
+
+\begin{corollary}[Linear incidence]\label{cor:sparse}
+Assume $\Count_{\mathrm{sp}}$. For every fixed $B$, hypergraphs with
+$J\le B(n+m+1)$ admit full-profile computation in polynomial space and
+time
+\[
+ (L+1)^{O(1)}2^{O_B(s/\sqrt{\log s})}.
+\]
+\end{corollary}
+\begin{proof}
+The selector formula has $v\ge n+m$ declared variables and
+$O_B(n+m+1)$ clauses. Its density is bounded by a fixed constant.
+Apply $\Count_{\mathrm{sp}}$ and repeat the proof of
+Theorem~\ref{thm:profile}.
+\end{proof}
+
+\paragraph{Why the sparse rate cannot be used for every kernel.}
+The kernel bounds vertices and edges, not incidences. It permits
+$J=\Theta(k^2)$, so the selector formula may have $\Theta(k)$ clauses
+per variable. The general parameterized bound therefore uses
+$\Count_1$ or $\Count_2$, not $\Count_{\mathrm{sp}}$. Introducing
+incidence variables to make a circuit encoding sparse would sacrifice
+the linear variable bound.
+
+\section{Pinned colors and other predicate families}
+\label{sec:extensions}
+
+\begin{proposition}[Pinned profiles and optimal colorings]\label{prop:pins}
+Theorem~\ref{thm:profile} continues to hold when any subset of vertices
+has specified colors and the profile counts only extensions of these
+pins. Under the same premise, an optimal coloring of the original
+hypergraph can be found within the time bound~\eqref{eq:profiletime}
+and polynomial space.
+\end{proposition}
+\begin{proof}
+Add unit clauses on the pinned color variables to every selector formula.
+This adds at most $n$ clauses and no variables, and leaves the moment
+interpretation valid on the restricted set of colorings. Conflicting
+pins give the identically zero profile.
+
+First find the largest exponent $b$ with positive coefficient in $P_H$.
+Process vertices in order. Tentatively pin the next vertex to zero and
+compute the restricted coefficient at $b$. Keep zero if that coefficient
+is positive; otherwise pin it to one. The invariant that some optimum
+coloring extends the retained pins guarantees success. At most $n+1$
+profile computations are used, adding a polynomial factor. This is a
+search result in $n+m$; it does not assume a target-$k$ solution-lifting
+property of the decision kernel.
+\end{proof}
+
+The selector construction is not specific to equality predicates.
+The following formulation isolates its scope.
+
+\begin{theorem}[Families of 2-CNF predicates]\label{thm:predicates}
+Let $\Phi_1,\ldots,\Phi_m$ be explicitly represented 2-CNF formulas on
+the same $n$ declared Boolean variables, with $C$ clauses in total.
+For $x\in\bits^n$, let $q(x)=|\{i:\Phi_i(x)=1\}|$.
+The entire distribution of $q(x)$ reduces to $m+1$ exact 3-CNF counting
+calls, each with $O(n+m+1)$ variables and $O(C+m+1)$ clauses.
+Consequently $\Count_\alpha$ gives time
+$\poly(L+1)2^{O(f_\alpha(n+m))}$ and polynomial space. A fixed bound
+$C=O(n+m)$ permits $\Count_{\mathrm{sp}}$ and its sharper rate.
+\end{theorem}
+\begin{proof}
+For every clause $D$ in $\Phi_i$, include the guarded clause
+$\neg y_i\vee D$, whose width is at most three. A selected predicate
+must be true; an unselected predicate imposes no condition. Add the
+same exact-$t$ selector circuit as before. For fixed $x$, its count is
+$\binom{q(x)}t$. Lemma~\ref{lem:inversion} recovers the distribution.
+An empty conjunction is true and imposes no guards; an empty clause
+produces the unit guard $\neg y_i$, correctly making that predicate
+unselectable. The size and space arguments are unchanged.
+\end{proof}
+
+Monochromaticity of a nonempty edge is the 2-CNF predicate
+\[
+ \bigwedge_{v\in e\setminus\{a\}}
+ \bigl((\neg x_a\vee x_v)\wedge(x_a\vee\neg x_v)\bigr),
+\]
+so Theorem~\ref{thm:encoding} is a direct specialization.
+
+\begin{corollary}[Arbitrary-width CNF satisfaction profiles]\label{cor:maxsat}
+Under $\Count_\alpha$, the number of assignments satisfying exactly
+$j$ clauses, for every $j$, of a CNF with $n$ variables and $m$ clauses
+of arbitrary width can be computed in
+$\poly(L+1)2^{O(f_\alpha(n+m))}$ time and polynomial space.
+An assignment maximizing the number of satisfied clauses can be found
+within the same asymptotic bound.
+\end{corollary}
+\begin{proof}
+For an original clause $D_i$, its falsification predicate is the
+conjunction of the negations of all its literals. This is a 1-CNF and
+hence a 2-CNF predicate. Apply Theorem~\ref{thm:predicates} to the
+falsification predicates and reverse the resulting distribution.
+Pinning and self-reduction work as in Proposition~\ref{prop:pins}.
+\end{proof}
+
+\section{Relation to polynomial identities and earlier approaches}
+
+The transform $B_H(w)=Q_H(1+w)$ is a standard binomial-moment identity.
+For nonempty hyperedges, White's coboundary polynomial~\cite{White11}
+specializes to $Q_H$. His deletion--contraction relation yields
+\[
+ Q_H(z)=Q_{H-e}(z)+(z-1)Q_{H/e}(z),
+\]
+and therefore
+$P_H(z)=zP_{H-e}(z)+(1-z)P_{H/e}(z)$.
+We credit these identities as prior algebraic structure.
+The present reduction evaluates the coefficients of the shifted polynomial
+through bounded-width guarded formulas rather than traversing the
+deletion--contraction tree.
+
+An alternative route processes every edge of size at least $r$ by that
+recurrence. A root-to-leaf path has at most $m$ decisions and at most
+$\lfloor(n-1)/(r-1)\rfloor$ contractions. Thus the number of leaves is
+at most
+\[
+ \sum_{j=0}^{\min\{m,\lfloor(n-1)/(r-1)\rfloor\}}\binom mj.
+\]
+At a leaf a direct circuit encoding uses $O(n+rm)$ variables. With a
+choice of $r$ balancing tree size against SAT cost, the sparse counting
+premise gives an exponent of order
+$s\sqrt{\log\log s}/(\log s)^{1/4}$.
+The selector reduction avoids both this branching overhead and the
+incidence-variable expansion. Even the more conservative $\Count_2$
+selector bound is asymptotically smaller than that exponent, since
+$(\log\log s)^{3/2}/(\log s)^{1/4}\to0$.
+
+The imported SAT manuscript already notes a bounded-rank, all-edges
+splittability consequence~\cite{SAT26}. Our reduction handles unbounded
+rank, arbitrary targets, and exact profiles with a variable bound depending
+only on $n+m$. This distinction is the relevant transfer issue.
+
+\section{Verification, limitations, and open questions}
+
+The elementary construction has an executable verification harness,
+\texttt{research/selector\_moments.py}. It constructs the guarded formulas,
+counts them with a small exhaustive DPLL oracle, and checks their inverse
+transform against exhaustive colorings. The accompanying code is a check
+of the reduction, not an implementation of the imported fast counter.
+Appendix~\ref{app:reproduce} specifies the reproducibility interface.
+Finite tests do not prove an asymptotic complexity claim; the size bounds,
+unique-extension argument, inversion, and bit analysis above supply the
+proof of the reduction.
+
+The scope note and revised manuscript report different quantitative
+counting rates. We have not rechecked the entire external theorem or its
+Lean development. All corollaries are therefore stated against the
+interfaces that they actually use. No practical speedup is established
+here; hidden constants and polynomial degrees in an imported algorithm
+can dominate feasible instances.
+
+A fuller literature audit is needed before claiming priority for the
+application. The coboundary polynomial, binomial inversion, cardinality
+circuits, and decision kernel are established ingredients. The central
+algorithmic point is that one-way guarded predicates retain linear
+\emph{variable} complexity while permitting polynomially many clauses.
+
+Two quantitative questions remain. First, can unrestricted-rank split
+profiles be reduced to fixed-density 3-CNF using only $O(n+m)$ variables?
+That would allow the sparse premise to remove the remaining
+$\log\log(n+m)$ factor. Second, can a sharper direct counting interface
+for these guarded formulas improve the general-density rate? The present
+proof does not answer either question.
+
+\begin{thebibliography}{9}
+\bibitem{LS09}
+Daniel Lokshtanov and Saket Saurabh.
+\newblock Even Faster Algorithm for Set Splitting!
+\newblock In \emph{Parameterized and Exact Computation}, LNCS 5917,
+pp.~288--299, Springer, 2009.
+\newblock \href{https://doi.org/10.1007/978-3-642-11269-0_24}{doi:10.1007/978-3-642-11269-0\_24}.
+
+\bibitem{NRD14}
+Jesper Nederlof, Johan M.~M. van Rooij, and Thomas~C. van Dijk.
+\newblock Inclusion/Exclusion Meets Measure and Conquer.
+\newblock \emph{Algorithmica}, 69(3):685--740, 2014.
+\newblock \href{https://doi.org/10.1007/s00453-013-9759-2}{doi:10.1007/s00453-013-9759-2}.
+
+\bibitem{SAT26}
+OpenAI.
+\newblock \emph{The Exponential Time Hypothesis is False}.
+\newblock Preprint, October 2026; revised October 25, 2026.
+\newblock \href{https://github.com/openai/math/blob/main/preprints/The-Exponential-Time-Hypothesis-is-False-October-25-2026/build/main_full_version.tex}{Versioned manuscript source}, main theorem
+(source label \texttt{thm:main}). Accessed October 29, 2026.
+
+\bibitem{Scope26}
+OpenAI.
+\newblock \emph{The Exponential Time Hypothesis is False: Lean formalization scope}.
+\newblock 2026.
+\newblock \href{https://github.com/openai/math/blob/main/lean/docs/378.md}{Repository scope note \texttt{lean/docs/378.md}}.
+Accessed October 29, 2026.
+
+\bibitem{White11}
+Jacob~A. White.
+\newblock On Multivariate Chromatic Polynomials of Hypergraphs and Hyperedge Elimination.
+\newblock \emph{Electronic Journal of Combinatorics}, 18(1):P160, 2011.
+\newblock \href{https://doi.org/10.37236/647}{doi:10.37236/647}.
+\end{thebibliography}
+
+\appendix
+\section{Explicit reduction and output conventions}
+\label{app:reproduce}
+
+The following pseudocode describes the full-profile algorithm. The counter
+is an interface argument; supplying an exhaustive counter gives a small
+verification implementation, while the complexity theorem requires the
+stated subexponential interface.
+
+\begin{quote}\ttfamily\small
+SplitProfile(H, Count3):\\
+\hspace*{1em}n := number of declared vertices; m := number of indexed edges\\
+\hspace*{1em}for t := 0 to m:\\
+\hspace*{2em}declare x[1..n], y[1..m]\\
+\hspace*{2em}for each nonempty edge e[i]:\\
+\hspace*{3em}choose anchor a in e[i]\\
+\hspace*{3em}for v in e[i] except a:\\
+\hspace*{4em}add (not y[i] or not x[a] or x[v])\\
+\hspace*{4em}add (not y[i] or x[a] or not x[v])\\
+\hspace*{2em}add unique-extension exact-t circuit on y[1..m]\\
+\hspace*{2em}F[t] := Count3(resulting formula, all declared variables)\\
+\hspace*{1em}for j := 0 to m:\\
+\hspace*{2em}a[j] := sum over t=j..m of (-1)\^{}(t-j)*binom(t,j)*F[t]\\
+\hspace*{1em}return [a[m], a[m-1], ..., a[0]]
+\end{quote}
+
+The return value is indexed by the number of \emph{split} edges. All
+edges retain their occurrence labels, including duplicates. For $n=0$,
+the one empty coloring still contributes one. Isolated vertices remain
+declared variables, so they contribute correctly to every count. Pinning
+adds units to the color variables before each counting call.
+
+For independent reproduction, run
+\begin{quote}\ttfamily\small
+python3 research/selector\_moments.py
+\end{quote}
+from the repository root. The harness imports the constant-fan-in circuit
+and exhaustive counting utilities in \texttt{research.py}. It checks
+every simple hypergraph on at most three vertices, including empty and
+singleton edges, and seeded additional instances with parallel edges and
+isolated vertices. Its assertions verify the guarded count identity,
+binomial inversion, clause width, and a linear bound on the number of
+variables. Additional pinned-color and predicate-family checks, when
+present in the harness, test the same interfaces; they are not needed
+as premises of the mathematical proof.
+
+\section{Source separation}
+
+For clarity, the proof dependencies are:
+\begin{itemize}
+\item Theorems~\ref{thm:encoding} and~\ref{thm:predicates}, and
+Lemma~\ref{lem:inversion}, are elementary reductions with full proofs here.
+\item Theorem~\ref{thm:profile} and the profile/search corollaries use
+exactly the selected counting interface from Definition~\ref{def:count}.
+\item Corollary~\ref{cor:parameter} additionally uses the established
+decision kernel~\cite{LS09}; it does not assume a counting kernel.
+\item Corollary~\ref{cor:sparse} uses the separate fixed-density
+interface. It is not substituted into the general kernel bound.
+\end{itemize}
+The exponential-base proposal studied elsewhere in the working repository
+is not an input to this manuscript.
+
+\end{document}

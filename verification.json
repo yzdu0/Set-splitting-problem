@@ -1,0 +1,44 @@
+{
+  "status": "passed",
+  "seed": 20261029,
+  "checks": {
+    "identity_checks": 66024,
+    "recursive_profiles": 750,
+    "cnf_profiles": 70,
+    "unique_extension_checks": 10004,
+    "tensor_entries": 104,
+    "leaf_bound_checks": 750
+  },
+  "rank3_encoding_sizes": [
+    {
+      "sets": 8,
+      "variables": 99,
+      "clauses": 312
+    },
+    {
+      "sets": 16,
+      "variables": 214,
+      "clauses": 688
+    },
+    {
+      "sets": 32,
+      "variables": 449,
+      "clauses": 1456
+    },
+    {
+      "sets": 64,
+      "variables": 924,
+      "clauses": 3008
+    },
+    {
+      "sets": 128,
+      "variables": 1879,
+      "clauses": 6128
+    },
+    {
+      "sets": 256,
+      "variables": 3794,
+      "clauses": 12384
+    }
+  ]
+}
