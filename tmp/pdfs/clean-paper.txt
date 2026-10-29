@@ -1,0 +1,243 @@
+                             Subexponential Set Splitting
+                              from Exact SAT Counting
+                                                GPT-6
+                                            OpenAI Codex
+
+                                          29 October 2026
+
+
+                                               Abstract
+        We reduce Set Splitting to exact counting for 3-CNF formulas. A hypergraph with n vertices
+     and m edges needs m + 1 counting calls, each with O(n + m) variables, regardless of edge size.
+     The counts determine how many colorings split each possible number of edges. Using the
+     general counting bound stated in the October 2026 SAT manuscript, this gives a deterministic
+     polynomial-space algorithm with running time
+                                                               √
+                                      |I|O(1) + 2O(k log log k/ log k) ,
+
+     where k is the number of edges to split. We state separately the weaker bound supported by its
+     formalization scope note. The reduction is proved here; the SAT counting result is assumed.
+
+
+1    Problem and assumptions
+A coloring splits a set if the set contains both colors. Set Splitting asks whether a coloring can
+split at least k sets. There is no bound on set size. Lokshtanov and Saurabh [1] give an equivalent
+instance with at most k vertices and 2k edges. Earlier specialized algorithms take O∗ (1.7171k ) time
+with exponential space or O∗ (1.8213k ) time with polynomial space [2]. Here O∗ hides polynomial
+factors.
+    Let H = (V, (ei )m i=1 ) be a hypergraph with V = [n]. Edges have separate labels, so repeated
+edges count separately. Write                             ∑
+                                      s = n + m,      J=     |ei |.
+                                                            i
+
+The vertices and edges are listed explicitly; L is the input bit length. Empty and singleton edges
+are never split. For this paper, both count as monochromatic.
+    For α ∈ {1, 2}, deﬁne
+                                                v(log log v)α
+                                       fα (v) =     √         .
+                                                      log v
+Small arguments are handled directly. We use the following external assumption.
+
+Deﬁnition 1.1 (SAT counting assumption). Countα is a uniform deterministic algorithm that
+counts the satisfying assignments of a 3-CNF with v declared variables and encoding length ℓ in
+time
+                                       (ℓ + 1)O(1) 2O(fα (v))
+and polynomial space.
+
+                                                   1
+Subexponential Set Splitting                                                                       Research draft
+
+
+   The revised SAT manuscript states Count1 [3]. Its formalization scope note documents
+Count2 [4]. We keep these rates separate and do not reprove either result. All formulas below have
+width at most three. Unused variables remain declared and contribute their usual factor of two.
+
+
+2    Counting selected monochromatic edges
+For a coloring x ∈ {0, 1}n , let u(x) be the number of monochromatic edges. Deﬁne
+                                                                                ∑
+                                                                                m
+                           aj = |{x : u(x) = j}|,                  PH (z) =           aj z m−j .
+                                                                                j=0
+
+Thus the coeﬃcient of z b counts colorings that split exactly b edges. This is a form of the hypergraph
+coboundary polynomial [5].
+   We ﬁrst compute                            (      )
+                                        ∑      u(x)
+                               Ft =                    ,    0 ≤ t ≤ m.                               (1)
+                                     x∈{0,1}n
+                                                 t
+
+These counts select t monochromatic edges, then sum over all colorings.
+Lemma 2.1 (Recovering the distribution). The counts in (1) give
+                                                                      ( )
+                                                   ∑
+                                                   m
+                                                                       t
+                                                                t−j
+                                           aj =          (−1)            Ft .                                 (2)
+                                                   t=j
+                                                                       j
+
+This calculation takes polynomial time and space.
+Proof. The binomial theorem gives
+                               ∑
+                               m               ∑                       ∑
+                                                                       m
+                                     Ft wt =       (1 + w)u(x) =             aj (1 + w)j .
+                               t=0             x                       j=0
+
+Replace w by z − 1 and compare coeﬃcients. Each Ft ≤ 2n+m . Each term in (2) has magnitude at
+most 2n+2m , so partial sums need only O(n + m + log(m + 1)) bits. There are O(m2 ) terms.
+
+Lemma 2.2 (Counting selected bits). The condition that exactly t of m bits equal one has a width-
+three CNF encoding with O(m + 1) extra variables and clauses. Each valid input assignment has
+exactly one extension to the extra variables.
+Proof. Sum the bits using a balanced tree of binary adders, then ﬁx the sum to t. At level h, there
+are O(m/2h ) additions of O(h)-bit numbers. The gate count is
+                                                              
+                                                    ∑ h
+                                           O m                 = O(m).
+                                                    h≥1
+                                                          2h
+
+Padding with zeros handles other input lengths. Encode each gate by its full logical equivalence.
+For example, g ↔ (a ∧ b) needs
+
+                                     (¬g ∨ a) ∧ (¬g ∨ b) ∧ (g ∨ ¬a ∨ ¬b).
+
+OR, NOT, and XOR also have constant-size width-three encodings. The inputs determine every
+gate value, giving the required unique extension. The case m = 0 takes constant space.
+
+                                                           2
+Subexponential Set Splitting                                                                 Research draft
+
+
+Theorem 2.3 (SAT reduction). Each Ft is the satisfying-assignment count of a 3-CNF with O(n +
+m + 1) variables and O(J + m + 1) clauses. The formula can be built in polynomial time.
+
+Proof. Use color variables x1 , . . . , xn and one selector yi per edge. For each nonempty edge ei ,
+choose an anchor ai ∈ ei . For every v ∈ ei \ {ai }, add
+
+                                (¬yi ∨ ¬xai ∨ xv ),           (¬yi ∨ xai ∨ ¬xv ).                       (3)
+
+These clauses say that selecting an edge forces all its vertices to have the same color. Empty and
+singleton edges need no clauses. Add the exact-t selector count from Lemma 2.2.
+    Fix a coloring x. Its allowed selector
+                                      (u(x))
+                                            assignments are precisely the t-element subsets of its
+u(x) monochromatic edges. There are t such assignments, each with one extension to the gate
+variables. Summing over x proves that the count is Ft .
+    The edge constraints use at most 2J clauses and no extra variables. The selector count adds
+O(m + 1) variables and clauses. The encoding length is O((J + n + m + 1) log(n + m + 2)).
+
+   The selectors use one-way implications: a monochromatic edge may be selected or left unselected.
+The gate constraints use equivalences so their extra variables do not multiply the count.
+   For example, two edges {a, b} and {b, c} give
+
+                           (a0 , a1 , a2 ) = (2, 4, 2),       (F0 , F1 , F2 ) = (8, 8, 2).
+
+Formula (2) recovers (2, 4, 2), and PH (z) = 2 + 4z + 2z 2 .
+
+
+3    Running time
+Theorem 3.1 (Complete distribution). Assume Countα . All coeﬃcients of PH can be computed
+deterministically in polynomial space and time
+
+                                           (L + 1)O(1) 2O(fα (n+m)) .                                   (4)
+
+Proof. Build the formula in Theorem 2.3 for each t = 0, . . . , m and count its satisfying assignments.
+Each formula has v ≤ C(n + m + 1) variables for an absolute constant C. Its length is polynomial
+in L + 1, and fα (C(s + 1)) = O(fα (s)). The m + 1 calls and Lemma 2.1 add only polynomial work.
+Run the calls one at a time. Their outputs and all intermediate sums have polynomial bit length,
+so the total space is polynomial.
+
+Corollary 3.2 (Set Splitting). Under Countα , Set Splitting with target k can be decided in polyno-
+mial space and time
+                                              |I|O(1) + 2O(fα (k)) .
+                                                                  √
+Thus the revised √     SAT    manuscript   gives  2 O(k log log k/ log k)
+                                                                          + |I|O(1) . The scope note gives
+               2
+2O(k(log log k) / log k) + |I|O(1) . Both bounds are subexponential in k.
+
+Proof. Apply the decision kernel of Lokshtanov and Saurabh [1, Theorem 1]. It answers the instance
+or returns an equivalent instance (H ′ , k0 ) with at most k vertices and 2k edges, where k is the
+original target. Use Theorem 3.1 on H ′ . Answer yes if a coeﬃcient at an exponent at least k0 is
+positive. The reduced input has polynomial length in k + 1. Its polynomial factors are absorbed
+in the displayed exponential term.
+
+
+
+                                                          3
+Subexponential Set Splitting                                                             Research draft
+
+
+   This kernel preserves the decision, not necessarily the number of colorings. The corollary counts
+the reduced instance. Theorem 3.1 counts the original instance in terms    √ of n + m.
+   The SAT manuscript also states a faster bound poly(ℓ + v)2       OD (v/  log v) for formulas with at
+
+most Dv clauses, for ﬁxed D. If J = O(n + m), our formulas have ﬁxed clause density, giving
+                                                        √
+                                  (L + 1)O(1) 2O((n+m)/ log(n+m)) .
+
+This faster rate does not apply to every kernel: it may have Θ(k 2 ) incidences and only O(k)
+variables.
+
+
+4    Extensions
+Fixed colors and an optimal coloring. Add unit clauses to ﬁx any chosen vertex colors. The
+same proof counts only colorings extending those choices. To ﬁnd an optimal coloring, ﬁrst ﬁnd
+the largest exponent b with a positive coeﬃcient. Fix vertices one at a time. Keep color zero if
+the coeﬃcient at b stays positive; otherwise keep color one. An optimum remains possible at each
+step. This takes at most n + 1 distribution computations and has the same bound as (4), up to a
+polynomial factor. It does not claim a target-k search algorithm for the original instance.
+
+Families of 2-CNF formulas. Let Φ1 , . . . , Φm be 2-CNF formulas on the same n variables, with
+C clauses in total. For every clause D of Φi , add ¬yi ∨ D. Selecting i now forces Φi to hold. The
+exact-t selector count and binomial inversion recover the number of assignments making exactly j
+of the formulas true, for every j. Each SAT call uses O(n + m + 1) variables and O(C + m + 1)
+clauses, so Theorem 3.1 applies.
+    This also counts assignments by the number of satisﬁed clauses in any CNF, regardless of
+clause width. Use the predicate that each original clause is false: it is a conjunction of unit clauses.
+Reverse the resulting distribution to count satisﬁed clauses.
+
+
+5    Checks and scope
+Run python3 research/verify_paper.py from the repository root. The code checks the SAT
+counts against exhaustive assignments, including repeated edges, unused vertices, ﬁxed colors, and
+the extensions above. Results and source hashes are in paper/verification.json.
+    The tests check the reduction, not the external SAT algorithm. The polynomial identity is
+established prior work [5]. No practical speedup or publication priority is claimed. The open
+quantitative question is whether the ﬁxed-density SAT bound can be obtained for arbitrary edge
+sizes while keeping only O(n + m) variables.
+
+
+References
+[1] Daniel Lokshtanov and Saket Saurabh. Even Faster Algorithm for Set Splitting! In Parameter-
+    ized and Exact Computation, LNCS 5917, pp. 288–299, Springer, 2009. doi:10.1007/978-3-642-
+    11269-0_24.
+
+[2] Jesper Nederlof, Johan M. M. van Rooij, and Thomas C. van Dijk. Inclusion/Exclusion Meets
+    Measure and Conquer. Algorithmica, 69(3):685–740, 2014. doi:10.1007/s00453-013-9759-2.
+
+
+
+                                                   4
+Subexponential Set Splitting                                                    Research draft
+
+
+[3] OpenAI. The Exponential Time Hypothesis is False. Preprint, October 2026; revised October
+    25, 2026. Manuscript, main theorem. Accessed October 29, 2026.
+
+[4] OpenAI. The Exponential Time Hypothesis is False: Lean formalization scope. 2026. Formal-
+    ization scope note. Accessed October 29, 2026.
+
+[5] Jacob A. White. On Multivariate Chromatic Polynomials of Hypergraphs and Hyperedge Elim-
+    ination. Electronic Journal of Combinatorics, 18(1):P160, 2011. doi:10.37236/647.
+
+
+
+
+                                             5
+

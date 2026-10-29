@@ -22,7 +22,7 @@
     "research.py": "cdb4685e58caa264ff5233c904d0810e8f4c8c01f35714609724e71cd9ed96fc",
     "research/selector_moments.py": "9f3416c7cfd4dbfaf2ca36696c35d8af35c65ed2eeaf00a312358fab799c4e11",
     "research/verify_paper.py": "4882f9b4863bd8223b8cc2f54db03864ab320ad7c6cd411e1e27f8b2c0bdade8",
-    "paper/main.tex": "bb734b13c0237aa86278a04769fa383128858c3c3117bb4f2d6b1efdd7a6bb42"
+    "paper/main.tex": "5b6edbb98153ed76b3a6c4340fde39710b76f25f9f756516a5e36ec3e87386bd"
   },
   "selector_harness_output": "PASS: 378 complete split-profile comparisons; 1773 exact selector-moment #3SAT counts.\nPASS: 20 optimal-coloring self-reductions and fully pinned profile checks.",
   "encoding_sizes": [
