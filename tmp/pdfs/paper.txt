@@ -1,0 +1,488 @@
+                        Subexponential Set Splitting through
+                        Selector Moments and Exact #3SAT
+
+
+                                            29 October 2026
+
+            AI-assisted research draft. No authorship or publication-priority claim is assigned.
+
+                                                Abstract
+          We give a variable-eﬃcient reduction from the complete split-count distribution of an
+      unbounded-rank hypergraph to exact counting for 3-CNF formulas. For a hypergraph with n
+      vertices and m indexed
+                       ∑      edges, the reduction makes m + 1 counting calls, each with O(n + m)
+      variables and O( e |e| + m + 1) clauses. Selectors mark arbitrary subsets of monochromatic
+      edges; ﬁxing the number of selectors computes binomial moments, from which the whole distri-
+      bution is recovered exactly. Combining this reduction with the general-density exact-counting
+      theorem stated in the October 2026 SAT manuscript gives deterministic polynomial-space time
+                                                      √
+                                       2O(k log log k/ log k) + |I|O(1)
+
+      for Set Splitting parameterized by the target number k of split sets. Using only the√weaker
+                                                                                            2
+      rate documented in the accompanying formalization scope note gives 2O(k(log log k) / log k) +
+      |I|O(1) . The same bounds, with k replaced by n + m, compute the original hypergraph’s full
+      distribution and an optimal coloring. The reduction also applies to counting the number of
+      satisﬁed predicates in a family of 2-CNF formulas, and hence to the complete satisfaction proﬁle
+      of arbitrary-width CNF. All subexponential bounds explicitly depend on the imported counting
+      theorem; the reductions and counting identities do not.
+
+
+1    Introduction
+An edge of a hypergraph is split by a Boolean coloring if it contains both colors. In the parameterized
+Set Splitting problem, the input is a hypergraph and a target k, and the question is whether
+some coloring splits at least k edges. The parameter counts edges that must be split; it does not
+bound their cardinality. We allow arbitrary edge sizes.
+    Lokshtanov and Saurabh [1] give a polynomial-time decision kernel with at most k vertices
+and 2k edges. Specialized algorithms of Nederlof, van Rooij, and van Dijk [2] achieve O∗ (1.7171k )
+time with exponential space and O∗ (1.8213k ) time with polynomial space. Here O∗ suppresses
+polynomial factors. These are useful established reference points for the present transfer result.
+    The recent manuscript The Exponential Time Hypothesis is False states subexponential exact-
+counting algorithms for each ﬁxed CNF width [3]. A direct encoding of whether every hyperedge
+splits uses clauses whose width equals the edge size. Replacing large OR gates by bounded-fan-in
+circuits can introduce one auxiliary variable per incidence. Even after the decision kernel, this can
+produce Θ(k 2 ) variables, which does not by itself give a subexponential dependence on k from the
+imported quantitative bound.
+
+
+                                                     1
+Subexponential Set Splitting                                                                          Research draft
+
+
+   We avoid this expansion by counting selected subsets of unsplit edges. A selector need only
+imply monochromaticity. Monochromaticity is a conjunction of pairwise equalities, so each guarded
+condition is a clause of width at most three without an incidence variable. A cardinality circuit
+on the selectors uses only O(m) additional variables. Its counts are binomial moments of the
+unsplit-edge distribution, which can be inverted in polynomial time.
+
+Contributions. The main unconditional reduction, Theorem 3.3, uses O(n + m) variables re-
+gardless of edge rank. Theorem 4.1 transfers the two documented general-density counting rates
+to full split proﬁles. Corollary 4.2 combines the transfer with the decision kernel. Section 5 proves
+extensions to pinned colors, optimal colorings, and families of 2-CNF predicates.
+
+External dependence and status. We treat the quantitative counting statements in Section 2
+as explicit algorithmic premises. This paper neither reproduces their proofs nor independently
+certiﬁes their formalization. The stronger manuscript rate and the weaker rate documented in its
+formalization scope note are kept separate. This is a research draft, not a claim of external review
+or publication priority. The proposed contribution is the quantitative, variable-eﬃcient application
+of established counting ideas to unbounded-rank split proﬁles.
+
+
+2    Preliminaries and counting premises
+A hypergraph is H = (V, (ei )mi=1 ), with V = [n] and ei ⊆ V . Edges are indexed: parallel edges
+remain distinct occurrences. Put
+                                                             ∑
+                                                             m
+                                      s = n + m,        J=         |ei |.
+                                                             i=1
+
+The universe and incidence lists are explicit. Let L denote their bit encoding length, including
+isolated vertices and edge labels; polynomial factors may depend on L + 1. Empty and singleton
+edges are never split. For convenience, we call them monochromatic, including the vacuous empty-
+edge case.
+    For x ∈ {0, 1}n , let uH (x) be the number of monochromatic edges and bH (x) = m − uH (x) the
+number of split edges. Deﬁne
+
+       aj (H) = |{x ∈ {0, 1}n : uH (x) = j}|,                                                                    (1)
+                  ∑
+                  m                                                    ∑                   ∑
+                                                                                           m
+       QH (z) =         aj (H)z j ,                     PH (z) =              z bH (x) =         aj (H)z m−j .   (2)
+                  j=0                                              x∈{0,1}n                j=0
+
+Thus PH is the split-count polynomial. For nonempty edges, QH is a specialization of the hypergraph
+coboundary polynomial studied by White [5]. Neither this polynomial nor its usual deletion–
+contraction identity is claimed to be new.
+    All logarithmic expressions below are for suﬃciently large arguments; ﬁnitely many small cases
+are solved directly. For α ∈ {1, 2}, write
+
+                                                   v(log log v)α
+                                        fα (v) =      √          .
+                                                        log v
+The choice of logarithm base changes only constants. A monotone extension handles small argu-
+ments.
+
+                                                    2
+Subexponential Set Splitting                                                           Research draft
+
+
+Deﬁnition 2.1 (Counting interfaces). Interface Countα is a uniform deterministic algorithm that
+exactly counts satisfying assignments of a 3-CNF with v declared variables and encoding length ℓ
+in time
+                                        (ℓ + 1)O(1) 2O(fα (v))
+and space  √
+               polynomial in ℓ + v + 1. Interface Countsp has, for every ﬁxed D, time poly(ℓ +
+v)2 OD (v/   log v) on formulas with at most Dv clauses, and polynomial space.
+
+
+    The revised October 25 manuscript states Count1 and Countsp as specializations of its ﬁxed-
+width main theorem [3]. The accompanying scope note documents Count2 [4]. We use width
+three throughout; no hidden constant is allowed to depend on a growing edge size. The interfaces
+count assignments to declared variables, including isolated ones. If an implementation drops such
+variables, their factor of two must be restored. Unit and binary clauses can be padded by repeating
+literals when an interface requires exactly three literal occurrences.
+
+
+3    Selector moments and a linear-variable encoding
+Deﬁne the binomial moments
+                                                     (          )
+                                            ∑          uH (x)
+                               Ft (H) =                       ,           0 ≤ t ≤ m,              (3)
+                                          x∈{0,1}n
+                                                         t
+       ()
+where jt = 0 for t > j. The selectors below count subsets of monochromatic edges rather than
+requiring every monochromatic edge to be selected.
+
+Lemma 3.1 (Binomial inversion). The moments determine the whole proﬁle by
+                                                                    ( )
+                                                 ∑
+                                                 m
+                                                                     t
+                                                              t−j
+                                    aj (H) =           (−1)            Ft (H).                    (4)
+                                                 t=j
+                                                                     j
+
+Equivalently,
+                                                 ∑
+                                                 m
+                                    PH (z) =           Ft (H)z m−t (1 − z)t .                     (5)
+                                                 t=0
+The transformation uses polynomially many bit operations in n + m + 1.
+                      ∑m            t
+Proof. Let BH (w) =      t=0 Ft (H)w . The binomial theorem gives
+                                            ∑
+                                BH (w) =         (1 + w)uH (x) = QH (1 + w).
+                                             x
+
+Hence QH (z) = BH (z − 1); taking coeﬃcients proves (4). Substituting z −1 and multiplying by
+z m gives the polynomial identity (5). Each Ft ≤ 2n+m . Every term of (4) has magnitude at most
+2n+2m , and each partial sum has magnitude at most (m+1)2n+2m . Thus O(n+m+log(m+1)) bits
+suﬃce, including intermediate signed arithmetic. An O(m2 )-term implementation is polynomial in
+the explicit output size.
+
+Lemma 3.2 (Linear-size exact cardinality circuit). For m Boolean inputs and 0 ≤ t ≤ m, the
+predicate that exactly t inputs equal one has a fan-in-two Boolean circuit with O(m + 1) gates. It
+admits an equivalent width-three Tseitin encoding with O(m + 1) auxiliary variables and clauses,
+and a unique auxiliary extension for every satisfying input assignment.
+
+                                                          3
+Subexponential Set Splitting                                                                 Research draft
+
+
+Proof. Pad the input list with zeros to a power of two less than 2m when m > 0. Sum the bits in a
+balanced binary tree. At level h, there are O(m/2h ) additions on O(h)-bit operands, each requiring
+O(h) bounded-fan-in gates. The total is
+                                                            
+                                                  ∑ h
+                                          O m                = O(m).
+                                                  h≥1
+                                                      2h
+
+Fixing the output bits to the binary expansion of t uses O(log(m + 1)) unit conditions. Constants
+and m = 0 require only constant overhead.
+    Introduce a variable for each gate and encode its full logical equivalence. For example, g ↔ (a∧b)
+is encoded by
+                                (¬g ∨ a) ∧ (¬g ∨ b) ∧ (g ∨ ¬a ∨ ¬b).
+OR, NOT, and a constant-size expansion of XOR have width-three encodings. Once the input bits
+are ﬁxed, each gate variable is uniquely determined in topological order. Consequently satisfying
+inputs have exactly one extension, while nonsatisfying inputs have none.
+
+Theorem 3.3 (Selector encoding). For every hypergraph H and 0 ≤ t ≤ m, one can construct in
+polynomial time a 3-CNF ΨH,t with
+
+                               v = O(n + m + 1),                 c = O(J + m + 1)
+
+variables and clauses, respectively, such that #ΨH,t = Ft (H). The implicit constants are absolute
+and independent of edge rank. Its bit encoding length is O((J + n + m + 1) log(n + m + 2)).
+Proof. Use the color variables x1 , . . . , xn and introduce a selector yi for each indexed edge ei . For
+a nonempty ei , choose an anchor ai ∈ ei . For every v ∈ ei \ {ai } include the clauses
+
+                               (¬yi ∨ ¬xai ∨ xv ),            (¬yi ∨ xai ∨ ¬xv ).                       (6)
+
+They express yi ⇒ (xai = xv ). No extra variable is introduced for an incidence. Empty and
+singleton edges need no guarded clauses, because they are always unsplit. Finally add the exact-t
+circuit and the unique-extension encoding of Lemma 3.2 on the m selectors.
+    Fix a coloring x. A selector may equal one only on a monochromatic edge; on each such    (
+                                                                                                edge)
+it may independently equal zero or one. The exact-t condition therefore permits exactly uHt(x)
+selector assignments. For every permitted selector assignment the gate variables have one extension.
+Summing over x proves the count identity.
+                                   ∑
+    The guarded clauses number 2 i max{|ei | − 1, 0} ≤ 2J. The cardinality construction adds
+O(m + 1) variables and clauses. The declared color variables contribute n, even if they are isolated.
+All variable indices use O(log(n + m + 2)) bits, giving the asserted length.
+
+Remark 3.4 (The one-way implication is essential). The guards are deliberately not equivalences
+between yi and monochromaticity. Requiring equivalence would destroy the subset-counting inter-
+pretation. In contrast, the auxiliary gate constraints must be equivalences to obtain a unique gate
+extension. These two roles are diﬀerent.
+
+3.1   A small example
+Let V = {a, b, c} and let the edges be {a, b} and {b, c}. There are two colorings with no monochro-
+matic edge, four with one, and two with two. Thus
+
+                          (a0 , a1 , a2 ) = (2, 4, 2),        (F0 , F1 , F2 ) = (8, 8, 2).
+
+                                                         4
+Subexponential Set Splitting                                                               Research draft
+
+
+Inversion returns a2 = 2, a1 = 8 − 2 · 2 = 4, and a0 = 8 − 8 + 2 = 2. The resulting split-count
+polynomial is PH (z) = 2 + 4z + 2z 2 . This example illustrates why counting only the existence of a
+selector assignment would lose the needed information.
+
+
+4    Subexponential algorithms
+Theorem 4.1 (Complete split proﬁles). Assume Countα for α ∈ {1, 2}. On every explicitly rep-
+resented hypergraph with s = n + m, all coeﬃcients of PH can be computed deterministically in
+polynomial space and time
+                                    (L + 1)O(1) 2O(fα (s)) .                              (7)
+There is no restriction on rank, parallel edges, or isolated vertices.
+Proof. For t = 0, 1, . . . , m, construct ΨH,t and call the one ﬁxed width-three counting algorithm.
+Theorem 3.3 gives at most C(s+1) variables for an absolute C. The encoding lengths are polynomial
+in L + 1. Since fα (C(s + 1)) = O(fα (s)) for large s, each call has the asserted exponential bound.
+The m + 1 calls and the inversion of Lemma 3.1 add only polynomial overhead.
+    Make the calls sequentially, keeping only their integer outputs. The formulas have polynomial
+length, each call uses polynomial space, and all moment and transform values have polynomial bit
+length. The output has m + 1 coeﬃcients of at most n + 1 bits each. Thus the whole algorithm
+uses polynomial space.
+
+Corollary 4.2 (Parameterized decision). Under Countα , an instance I of Set Splitting with
+target k can be decided deterministically in polynomial space and time
+
+                                           |I|O(1) + 2O(fα (k)) .                                      (8)
+                                           √                                                   2
+                                                                                                 √
+In particular, Count1 gives 2O(k log log k/ log k) + |I|O(1) , and Count2 gives 2O(k(log log k) / log k) +
+|I|O(1) . Both are 2o(k) + |I|O(1) .
+Proof. Trivial targets can be answered immediately. Apply the decision kernel of Lokshtanov and
+Saurabh [1, Theorem 1]. It either answers the instance or returns an equivalent instance (H ′ , k0 )
+with at most k vertices and 2k edges. Keep k as the original parameter; no equality between k and
+k0 is needed. Compute PH ′ by Theorem 4.1 and answer yes exactly when a coeﬃcient at an index
+at least k0 is positive.
+    The kernel has s′ ≤ 3k and a representation of polynomial bit length in k + 1. Its polynomial
+factors are absorbed       O(fα (k)) for large k. The initial reduction costs polynomial time in |I|.
+                    √ in 2
+Since (log log k) / log k → 0, the dependence is subexponential in k.
+                 α
+
+
+Remark 4.3 (A decision kernel is suﬃcient). The computation in Corollary 4.2 counts colorings of
+the reduced instance. We do not assert that the kernel preserves the original coloring distribution.
+The full-proﬁle theorem applies directly to the original input with parameter n + m, whereas the
+target-k corollary is a decision result.
+Corollary 4.4 (Linear incidence). Assume Countsp . For every ﬁxed B, hypergraphs with J ≤
+B(n + m + 1) admit full-proﬁle computation in polynomial space and time
+                                                            √
+                                        (L + 1)O(1) 2OB (s/ log s) .
+
+Proof. The selector formula has v ≥ n + m declared variables and OB (n + m + 1) clauses. Its
+density is bounded by a ﬁxed constant. Apply Countsp and repeat the proof of Theorem 4.1.
+
+                                                     5
+Subexponential Set Splitting                                                           Research draft
+
+
+Why the sparse rate cannot be used for every kernel. The kernel bounds vertices and
+edges, not incidences. It permits J = Θ(k 2 ), so the selector formula may have Θ(k) clauses
+per variable. The general parameterized bound therefore uses Count1 or Count2 , not Countsp .
+Introducing incidence variables to make a circuit encoding sparse would sacriﬁce the linear variable
+bound.
+
+
+5    Pinned colors and other predicate families
+Proposition 5.1 (Pinned proﬁles and optimal colorings). Theorem 4.1 continues to hold when any
+subset of vertices has speciﬁed colors and the proﬁle counts only extensions of these pins. Under the
+same premise, an optimal coloring of the original hypergraph can be found within the time bound (7)
+and polynomial space.
+
+Proof. Add unit clauses on the pinned color variables to every selector formula. This adds at most
+n clauses and no variables, and leaves the moment interpretation valid on the restricted set of
+colorings. Conﬂicting pins give the identically zero proﬁle.
+    First ﬁnd the largest exponent b with positive coeﬃcient in PH . Process vertices in order.
+Tentatively pin the next vertex to zero and compute the restricted coeﬃcient at b. Keep zero if
+that coeﬃcient is positive; otherwise pin it to one. The invariant that some optimum coloring
+extends the retained pins guarantees success. At most n + 1 proﬁle computations are used, adding
+a polynomial factor. This is a search result in n + m; it does not assume a target-k solution-lifting
+property of the decision kernel.
+
+    The selector construction is not speciﬁc to equality predicates. The following formulation iso-
+lates its scope.
+
+Theorem 5.2 (Families of 2-CNF predicates). Let Φ1 , . . . , Φm be explicitly represented 2-CNF
+formulas on the same n declared Boolean variables, with C clauses in total. For x ∈ {0, 1}n , let
+q(x) = |{i : Φi (x) = 1}|. The entire distribution of q(x) reduces to m + 1 exact 3-CNF counting
+calls, each with O(n + m + 1) variables and O(C + m + 1) clauses. Consequently Countα gives time
+poly(L + 1)2O(fα (n+m)) and polynomial space. A ﬁxed bound C = O(n + m) permits Countsp and
+its sharper rate.
+
+Proof. For every clause D in Φi , include the guarded clause ¬yi ∨ D, whose width is at most three.
+A selected predicate must be true; an unselected predicate  (q(x))
+                                                                  imposes no condition. Add the same
+exact-t selector circuit as before. For ﬁxed x, its count is t . Lemma 3.1 recovers the distribution.
+An empty conjunction is true and imposes no guards; an empty clause produces the unit guard ¬yi ,
+correctly making that predicate unselectable. The size and space arguments are unchanged.
+
+    Monochromaticity of a nonempty edge is the 2-CNF predicate
+                                   ∧    (                            )
+                                            (¬xa ∨ xv ) ∧ (xa ∨ ¬xv ) ,
+                                 v∈e\{a}
+
+so Theorem 3.3 is a direct specialization.
+
+Corollary 5.3 (Arbitrary-width CNF satisfaction proﬁles). Under Countα , the number of assign-
+ments satisfying exactly j clauses, for every j, of a CNF with n variables and m clauses of arbitrary
+width can be computed in poly(L + 1)2O(fα (n+m)) time and polynomial space. An assignment maxi-
+mizing the number of satisﬁed clauses can be found within the same asymptotic bound.
+
+
+                                                    6
+Subexponential Set Splitting                                                           Research draft
+
+
+Proof. For an original clause Di , its falsiﬁcation predicate is the conjunction of the negations
+of all its literals. This is a 1-CNF and hence a 2-CNF predicate. Apply Theorem 5.2 to the
+falsiﬁcation predicates and reverse the resulting distribution. Pinning and self-reduction work as
+in Proposition 5.1.
+
+
+6    Relation to polynomial identities and earlier approaches
+The transform BH (w) = QH (1 + w) is a standard binomial-moment identity. For nonempty hy-
+peredges, White’s coboundary polynomial [5] specializes to QH . For a nonempty selected edge e,
+let H/e delete that occurrence and identify its vertices, retaining every other edge label. White’s
+Theorem 9, specialized to two primary colors and two colors in total, yields
+
+                               QH (z) = QH−e (z) + (z − 1)QH/e (z),
+
+and therefore PH (z) = zPH−e (z)+(1−z)PH/e (z). We credit these identities as prior algebraic struc-
+ture. The present reduction evaluates the coeﬃcients of the shifted polynomial through bounded-
+width guarded formulas rather than traversing the deletion–contraction tree.
+    An alternative route processes every edge of size at least r by that recurrence. A root-to-leaf
+path has at most m decisions and at most ⌊(n − 1)/(r − 1)⌋ contractions. Thus the number of
+leaves is at most
+                                     min{m,⌊(n−1)/(r−1)⌋} ( )
+                                             ∑             m
+                                                              .
+                                             j=0
+                                                           j
+
+At a leaf a direct circuit encoding uses O(n + rm) variables. With a choice √of r balancing tree
+size against SAT cost, the sparse counting premise gives an exponent of order s log log s/(log s)1/4 .
+The selector reduction avoids both this branching overhead and the incidence-variable expansion.
+Even the more conservative Count2 selector bound is asymptotically smaller than that exponent,
+since (log log s)3/2 /(log s)1/4 → 0.
+    The imported SAT manuscript already notes a bounded-rank, all-edges splittability conse-
+quence [3]. Our reduction handles unbounded rank, arbitrary targets, and exact proﬁles with
+a variable bound depending only on n + m. This distinction is the relevant transfer issue.
+
+
+7    Veriﬁcation, limitations, and open questions
+The elementary construction has executable veriﬁcation harnesses, research/selector_moments.py
+and research/verify_paper.py. They construct the guarded formulas, count them with a small
+exhaustive DPLL oracle, and check the inverse transform against exhaustive assignments. Ver-
+iﬁcation passed on 378 hypergraph proﬁles using 1,773 moment counts, 20 optimal-coloring
+self-reductions, 80 general 2-CNF predicate proﬁles, and 20 CNF violation proﬁles. The manifest
+also records 27 encoding-size checks. The accompanying code is a check of the reduction, not an
+implementation of the imported fast counter. Appendix A speciﬁes the reproducibility interface.
+Finite tests do not prove an asymptotic complexity claim; the size bounds, unique-extension
+argument, inversion, and bit analysis above supply the proof of the reduction.
+    The scope note and revised manuscript report diﬀerent quantitative counting rates. We have
+not rechecked the entire external theorem or its Lean development. All corollaries are therefore
+stated against the interfaces that they actually use. No practical speedup is established here; hidden
+constants and polynomial degrees in an imported algorithm can dominate feasible instances.
+
+
+                                                  7
+Subexponential Set Splitting                                                           Research draft
+
+
+   A fuller literature audit is needed before claiming priority for the application. The coboundary
+polynomial, binomial inversion, cardinality circuits, and decision kernel are established ingredients.
+The central algorithmic point is that one-way guarded predicates retain linear variable complexity
+while permitting polynomially many clauses.
+   Two quantitative questions remain. First, can unrestricted-rank split proﬁles be reduced to
+ﬁxed-density 3-CNF using only O(n + m) variables? That would allow the sparse premise to
+remove the remaining log log(n + m) factor. Second, can a sharper direct counting interface for
+these guarded formulas improve the general-density rate? The present proof does not answer either
+question.
+
+
+References
+[1] Daniel Lokshtanov and Saket Saurabh. Even Faster Algorithm for Set Splitting! In Parameter-
+    ized and Exact Computation, LNCS 5917, pp. 288–299, Springer, 2009. doi:10.1007/978-3-642-
+    11269-0_24.
+
+[2] Jesper Nederlof, Johan M. M. van Rooij, and Thomas C. van Dijk. Inclusion/Exclusion Meets
+    Measure and Conquer. Algorithmica, 69(3):685–740, 2014. doi:10.1007/s00453-013-9759-2.
+
+[3] OpenAI. The Exponential Time Hypothesis is False. Preprint, October 2026; revised October 25,
+    2026. Versioned manuscript source, main theorem (source label thm:main). Accessed October
+    29, 2026.
+
+[4] OpenAI. The Exponential Time Hypothesis is False: Lean formalization scope. 2026. Repository
+    scope note lean/docs/378.md. Accessed October 29, 2026.
+
+[5] Jacob A. White. On Multivariate Chromatic Polynomials of Hypergraphs and Hyperedge Elim-
+    ination. Electronic Journal of Combinatorics, 18(1):P160, 2011. doi:10.37236/647.
+
+
+A     Explicit reduction and output conventions
+The following pseudocode describes the full-proﬁle algorithm. The counter is an interface argument;
+supplying an exhaustive counter gives a small veriﬁcation implementation, while the complexity
+theorem requires the stated subexponential interface.
+
+      SplitProfile(H, Count3):
+        n := number of declared vertices; m := number of indexed edges
+        for t := 0 to m:
+          declare x[1..n], y[1..m]
+          for each nonempty edge e[i]:
+            choose anchor a in e[i]
+            for v in e[i] except a:
+              add (not y[i] or not x[a] or x[v])
+              add (not y[i] or x[a] or not x[v])
+          add unique-extension exact-t circuit on y[1..m]
+          F[t] := Count3(resulting formula, all declared variables)
+        for j := 0 to m:
+          a[j] := sum over t=j..m of (-1)ˆ(t-j)*binom(t,j)*F[t]
+        return [a[m], a[m-1], ..., a[0]]
+
+
+
+                                                  8
+Subexponential Set Splitting                                                            Research draft
+
+
+    The return value is indexed by the number of split edges. All edges retain their occurrence
+labels, including duplicates. For n = 0, the one empty coloring still contributes one. Isolated
+vertices remain declared variables, so they contribute correctly to every count. Pinning adds units
+to the color variables before each counting call.
+    For independent reproduction, run
+      python3 research/verify_paper.py
+
+from the repository root. This invokes the selector harness and writes paper/verification.json,
+including deterministic seeds, check counts, encoding sizes, and source hashes. The harness imports
+the constant-fan-in circuit and exhaustive counting utilities in research.py. It checks every simple
+hypergraph on at most three vertices, including empty and singleton edges, and seeded additional
+instances with parallel edges and isolated vertices. Its assertions verify the guarded count identity,
+binomial inversion, clause width, and a linear bound on the number of variables. Additional pinned-
+color and predicate-family checks test the extensions proved in Section 5. These ﬁnite checks are
+not premises of the mathematical proof.
+
+
+B      Source separation
+For clarity, the proof dependencies are:
+    • Theorems 3.3 and 5.2, and Lemma 3.1, are elementary reductions with full proofs here.
+    • Theorem 4.1 and the proﬁle/search corollaries use exactly the selected counting interface from
+      Deﬁnition 2.1.
+    • Corollary 4.2 additionally uses the established decision kernel [1]; it does not assume a count-
+      ing kernel.
+    • Corollary 4.4 uses the separate ﬁxed-density interface. It is not substituted into the general
+      kernel bound.
+
+
+
+
+                                                  9
+

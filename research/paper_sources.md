@@ -3,6 +3,26 @@
 Audit date: 29 October 2026. This file supplies source metadata and scope,
 not a claim of publication priority.
 
+**Later investigation in the same session:** the selector-moment encoding
+supersedes the earlier rank-cutoff transfer described near the end of this
+file. It uses O(n+m) variables, independent of maximum edge size; its formula
+may have O(sum_e |e|+m) clauses, so it requires the imported
+general-density bound. The manuscript `paper/main.tex` correctly credits the
+binomial-moment identity and coboundary polynomial as established algebra.
+Targeted searches did not locate the precise guarded-selector/cardinality
+reduction, but that does not establish priority.
+
+The identity sum_t F_t w^t = Q_H(1+w) is also the usual random-cluster
+expansion: for nonempty indexed hyperedges,
+
+    F_t = sum_{A subset E, |A|=t} 2^{c(V,A)},
+
+where c counts connected components, including isolated vertices. This
+follows directly by choosing selected monochromatic edges and then coloring
+their components. Thus the moments themselves are classical; the relevant
+algorithmic point is computing all of them with width-three formulas on
+O(n+m) variables while allowing polynomially many clauses.
+
 ## Verified bibliography
 
 ### Decision kernel

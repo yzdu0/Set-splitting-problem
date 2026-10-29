@@ -1,5 +1,16 @@
 # Set Splitting: research outcome
 
+**Latest result: selector-moment paper.** Continued investigation replaced the
+large-edge branching transfer with a simpler reduction using O(n+m) SAT
+variables independently of rank. The new [paper](paper/main.tex) derives
+polynomial-space time `|I|^O(1) + 2^O(k loglog(k)/sqrt(log(k)))` from the
+revised SAT manuscript's general-density counting theorem, and the squared
+loglog version from its formalization scope note. The reduction also computes
+full original-instance profiles in the joint size n+m. See
+[paper instructions](paper/README.md), [the new audit](research/sat_rate_audit.md),
+and [reproducible verification](paper/verification.json). The older research
+record below is retained for context; its SAT-based exponent is superseded.
+
 29 October 2026. **Research claim; independently unreviewed.**
 
 I obtained a proposed deterministic **O*(1.7116^k)** algorithm for unweighted

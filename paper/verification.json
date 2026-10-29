@@ -1,0 +1,247 @@
+{
+  "status": "passed",
+  "date": "2026-10-29",
+  "seed": 20261029,
+  "backend": "exhaustive DPLL and independent exhaustive coloring; not the external SAT algorithm",
+  "commands": [
+    "python3 research/verify_paper.py",
+    "python3 research/selector_moments.py"
+  ],
+  "checks": {
+    "full_hypergraph_profiles": 378,
+    "selector_moment_cnf_counts": 1773,
+    "optimal_coloring_self_reductions": 20,
+    "fully_pinned_profiles": 20,
+    "general_2cnf_predicate_profiles": 80,
+    "general_predicate_cnf_counts": 347,
+    "maxsat_violation_profiles": 20,
+    "maxsat_violation_cnf_counts": 75,
+    "encoding_size_checks": 27
+  },
+  "source_sha256": {
+    "research.py": "cdb4685e58caa264ff5233c904d0810e8f4c8c01f35714609724e71cd9ed96fc",
+    "research/selector_moments.py": "9f3416c7cfd4dbfaf2ca36696c35d8af35c65ed2eeaf00a312358fab799c4e11",
+    "research/verify_paper.py": "4882f9b4863bd8223b8cc2f54db03864ab320ad7c6cd411e1e27f8b2c0bdade8",
+    "paper/main.tex": "bb734b13c0237aa86278a04769fa383128858c3c3117bb4f2d6b1efdd7a6bb42"
+  },
+  "selector_harness_output": "PASS: 378 complete split-profile comparisons; 1773 exact selector-moment #3SAT counts.\nPASS: 20 optimal-coloring self-reductions and fully pinned profile checks.",
+  "encoding_sizes": [
+    {
+      "vertices": 1,
+      "sets": 0,
+      "rank": 0,
+      "incidences": 0,
+      "variables": 2,
+      "clauses": 2
+    },
+    {
+      "vertices": 1,
+      "sets": 0,
+      "rank": 1,
+      "incidences": 0,
+      "variables": 2,
+      "clauses": 2
+    },
+    {
+      "vertices": 1,
+      "sets": 1,
+      "rank": 0,
+      "incidences": 0,
+      "variables": 3,
+      "clauses": 2
+    },
+    {
+      "vertices": 1,
+      "sets": 1,
+      "rank": 1,
+      "incidences": 1,
+      "variables": 3,
+      "clauses": 2
+    },
+    {
+      "vertices": 2,
+      "sets": 2,
+      "rank": 0,
+      "incidences": 0,
+      "variables": 10,
+      "clauses": 20
+    },
+    {
+      "vertices": 2,
+      "sets": 2,
+      "rank": 1,
+      "incidences": 2,
+      "variables": 10,
+      "clauses": 20
+    },
+    {
+      "vertices": 2,
+      "sets": 2,
+      "rank": 2,
+      "incidences": 4,
+      "variables": 10,
+      "clauses": 24
+    },
+    {
+      "vertices": 4,
+      "sets": 4,
+      "rank": 0,
+      "incidences": 0,
+      "variables": 29,
+      "clauses": 72
+    },
+    {
+      "vertices": 4,
+      "sets": 4,
+      "rank": 1,
+      "incidences": 4,
+      "variables": 29,
+      "clauses": 72
+    },
+    {
+      "vertices": 4,
+      "sets": 4,
+      "rank": 2,
+      "incidences": 8,
+      "variables": 29,
+      "clauses": 80
+    },
+    {
+      "vertices": 4,
+      "sets": 4,
+      "rank": 4,
+      "incidences": 16,
+      "variables": 29,
+      "clauses": 96
+    },
+    {
+      "vertices": 8,
+      "sets": 8,
+      "rank": 0,
+      "incidences": 0,
+      "variables": 72,
+      "clauses": 192
+    },
+    {
+      "vertices": 8,
+      "sets": 8,
+      "rank": 1,
+      "incidences": 8,
+      "variables": 72,
+      "clauses": 192
+    },
+    {
+      "vertices": 8,
+      "sets": 8,
+      "rank": 2,
+      "incidences": 16,
+      "variables": 72,
+      "clauses": 208
+    },
+    {
+      "vertices": 8,
+      "sets": 8,
+      "rank": 8,
+      "incidences": 64,
+      "variables": 72,
+      "clauses": 304
+    },
+    {
+      "vertices": 16,
+      "sets": 16,
+      "rank": 0,
+      "incidences": 0,
+      "variables": 163,
+      "clauses": 448
+    },
+    {
+      "vertices": 16,
+      "sets": 16,
+      "rank": 1,
+      "incidences": 16,
+      "variables": 163,
+      "clauses": 448
+    },
+    {
+      "vertices": 16,
+      "sets": 16,
+      "rank": 2,
+      "incidences": 32,
+      "variables": 163,
+      "clauses": 480
+    },
+    {
+      "vertices": 16,
+      "sets": 16,
+      "rank": 16,
+      "incidences": 256,
+      "variables": 163,
+      "clauses": 928
+    },
+    {
+      "vertices": 32,
+      "sets": 32,
+      "rank": 0,
+      "incidences": 0,
+      "variables": 350,
+      "clauses": 976
+    },
+    {
+      "vertices": 32,
+      "sets": 32,
+      "rank": 1,
+      "incidences": 32,
+      "variables": 350,
+      "clauses": 976
+    },
+    {
+      "vertices": 32,
+      "sets": 32,
+      "rank": 2,
+      "incidences": 64,
+      "variables": 350,
+      "clauses": 1040
+    },
+    {
+      "vertices": 32,
+      "sets": 32,
+      "rank": 32,
+      "incidences": 1024,
+      "variables": 350,
+      "clauses": 2960
+    },
+    {
+      "vertices": 64,
+      "sets": 64,
+      "rank": 0,
+      "incidences": 0,
+      "variables": 729,
+      "clauses": 2048
+    },
+    {
+      "vertices": 64,
+      "sets": 64,
+      "rank": 1,
+      "incidences": 64,
+      "variables": 729,
+      "clauses": 2048
+    },
+    {
+      "vertices": 64,
+      "sets": 64,
+      "rank": 2,
+      "incidences": 128,
+      "variables": 729,
+      "clauses": 2176
+    },
+    {
+      "vertices": 64,
+      "sets": 64,
+      "rank": 64,
+      "incidences": 4096,
+      "variables": 729,
+      "clauses": 10112
+    }
+  ],
+  "scope": "Finite checks validate encodings, moments, inversion, and construction. They do not prove asymptotic complexity or validate the external theorem."
+}

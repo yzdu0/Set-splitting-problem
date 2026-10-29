@@ -1,5 +1,10 @@
 # A conditional subexponential algorithm for parameterized Set Splitting
 
+**Superseded quantitative bound.** The selector-moment reduction in
+`sat_rate_audit.md` and `../paper/main.tex` uses O(n+m) variables without
+branching and gives a stronger rate. This earlier proof is retained as a
+valid alternative argument, not the latest result.
+
 **Status, 29 October 2026.** This is a reduction and complexity argument, conditional on the recently released subexponential exact-counting theorem for fixed-width CNF. The reduction below does not establish that external theorem, independently certify its formalization, or establish publication priority. Its elementary steps can be audited separately from that theorem.
 
 ## Problem and external inputs

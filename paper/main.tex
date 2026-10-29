@@ -6,6 +6,10 @@
 \usepackage{xcolor}
 \definecolor{linkblue}{RGB}{28,66,116}
 \usepackage[colorlinks=true,allcolors=linkblue,breaklinks=true]{hyperref}
+\hypersetup{pdftitle={Subexponential Set Splitting through Selector Moments and Exact \#3SAT},
+pdfauthor={GPT-6 (OpenAI Codex)},
+pdfsubject={A variable-efficient counting reduction and conditional subexponential algorithms},
+pdfkeywords={set splitting, exact counting, satisfiability, binomial moments, parameterized algorithms}}
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
@@ -24,20 +28,20 @@
 \newtheorem{remark}[theorem]{Remark}
 \newcommand{\poly}{\operatorname{poly}}
 \newcommand{\sat}{\ensuremath{\#3\textnormal{SAT}}}
-\newcommand{\ssplit}{\textsc{Set Splitting}}
+\newcommand{\ssplit}{\textnormal{\textsc{Set Splitting}}}
 \newcommand{\mono}{\operatorname{mono}}
 \newcommand{\splitnum}{\operatorname{split}}
 \newcommand{\Count}{\mathsf{Count}}
 \newcommand{\bits}{\{0,1\}}
 \newcommand{\ind}{\mathbf{1}}
-\title{Subexponential Set Splitting through\Selector Moments and Exact \sat}
-\author{}
+\title{Subexponential Set Splitting through\\Selector Moments and Exact \sat}
+\author{GPT-6\\\small OpenAI Codex}
 \date{29 October 2026}
 \begin{document}
 \maketitle
 \vspace{-1.5em}
 \begin{center}
-\small\textit{AI-assisted research draft. No authorship or publication-priority claim is assigned.}
+\small\textit{AI-authored research draft. Publication priority has not been established.}
 \end{center}
 \begin{abstract}
 We give a variable-efficient reduction from the complete split-count
@@ -466,7 +470,10 @@ Pinning and self-reduction work as in Proposition~\ref{prop:pins}.
 
 The transform $B_H(w)=Q_H(1+w)$ is a standard binomial-moment identity.
 For nonempty hyperedges, White's coboundary polynomial~\cite{White11}
-specializes to $Q_H$. His deletion--contraction relation yields
+specializes to $Q_H$. For a nonempty selected edge $e$, let $H/e$ delete
+that occurrence and identify its vertices, retaining every other edge label.
+White's Theorem~9, specialized to two primary colors and two colors in total,
+yields
 \[
  Q_H(z)=Q_{H-e}(z)+(z-1)Q_{H/e}(z),
 \]
@@ -500,12 +507,16 @@ only on $n+m$. This distinction is the relevant transfer issue.
 
 \section{Verification, limitations, and open questions}
 
-The elementary construction has an executable verification harness,
-\texttt{research/selector\_moments.py}. It constructs the guarded formulas,
-counts them with a small exhaustive DPLL oracle, and checks their inverse
-transform against exhaustive colorings. The accompanying code is a check
-of the reduction, not an implementation of the imported fast counter.
-Appendix~\ref{app:reproduce} specifies the reproducibility interface.
+The verification harnesses are \path{research/selector_moments.py} and
+\path{research/verify_paper.py}. They construct the guarded formulas,
+count them with a small exhaustive DPLL oracle, and check the inverse
+transform against exhaustive assignments. Verification passed on 378
+hypergraph profiles using 1,773 moment counts, 20 optimal-coloring
+self-reductions, 80 general 2-CNF predicate profiles, and 20 CNF
+violation profiles. The manifest also records 27 encoding-size checks.
+The accompanying code is a check of the reduction, not an implementation
+of the imported fast counter. Appendix~\ref{app:reproduce} specifies the
+reproducibility interface.
 Finite tests do not prove an asymptotic complexity claim; the size bounds,
 unique-extension argument, inversion, and bit analysis above supply the
 proof of the reduction.
@@ -599,17 +610,20 @@ adds units to the color variables before each counting call.
 
 For independent reproduction, run
 \begin{quote}\ttfamily\small
-python3 research/selector\_moments.py
+python3 research/verify\_paper.py
 \end{quote}
-from the repository root. The harness imports the constant-fan-in circuit
-and exhaustive counting utilities in \texttt{research.py}. It checks
+from the repository root. This invokes the selector harness and writes
+\texttt{paper/verification.json}, including deterministic seeds, check
+counts, encoding sizes, and source hashes. The harness imports the
+constant-fan-in circuit and exhaustive counting utilities in
+\texttt{research.py}. It checks
 every simple hypergraph on at most three vertices, including empty and
 singleton edges, and seeded additional instances with parallel edges and
 isolated vertices. Its assertions verify the guarded count identity,
 binomial inversion, clause width, and a linear bound on the number of
-variables. Additional pinned-color and predicate-family checks, when
-present in the harness, test the same interfaces; they are not needed
-as premises of the mathematical proof.
+variables. Additional pinned-color and predicate-family checks test the
+extensions proved in Section~\ref{sec:extensions}. These finite checks
+are not premises of the mathematical proof.
 
 \section{Source separation}
 
@@ -624,7 +638,4 @@ decision kernel~\cite{LS09}; it does not assume a counting kernel.
 \item Corollary~\ref{cor:sparse} uses the separate fixed-density
 interface. It is not substituted into the general kernel bound.
 \end{itemize}
-The exponential-base proposal studied elsewhere in the working repository
-is not an input to this manuscript.
-
 \end{document}
